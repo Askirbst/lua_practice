@@ -1,10 +1,13 @@
+---@diagnostic disable: lowercase-global
 function love.load()
     local seed = os.time()
     math.randomseed(seed)
 end 
 
 local rain = love.audio.newSource("audio/rain.mp3", "stream")
-love.audio.play(rain)
+
+rain:setLooping(true)
+rain:play()
 
 local width = 800
 local height = 800
@@ -13,7 +16,6 @@ local scaleFactor = 800 / 1024
 local raindrops = {}
 local drops = 1
 
-
 function loadImage(path)
     local info = love.filesystem.getInfo(path)
     if info then
@@ -21,7 +23,7 @@ function loadImage(path)
     end
 end
 
-image = loadImage("images/bgImage.jpeg")
+local image = loadImage("images/bgImage.jpeg")
 
 function makeRain(drops)
 
@@ -52,12 +54,6 @@ end
 drops = makeRain(drops)
 
 function love.update(dt)
-
-    local stopped = rain:isStopped()
-    if stopped then
-        love.audio.play(rain)
-    end
-
     for i, raindrop in ipairs(raindrops) do
         raindrop.y1 = raindrop.y1 + raindrop.speed
         raindrop.y2 = raindrop.y2 + raindrop.speed
