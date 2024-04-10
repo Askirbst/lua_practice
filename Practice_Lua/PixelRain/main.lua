@@ -1,20 +1,34 @@
 ---@diagnostic disable: lowercase-global
 function love.load()
+    love.window.setFullscreen(true, "desktop")
+
     local seed = os.time()
     math.randomseed(seed)
+
+    local rain = love.audio.newSource("audio/rain.mp3", "stream")
+    rain:setLooping(true)
+    rain:play()
+
 end 
 
-local rain = love.audio.newSource("audio/rain.mp3", "stream")
+local width, height = love.window.getDimensions()
 
-rain:setLooping(true)
-rain:play()
-
-local width = 800
-local height = 800
-local scaleFactor = 800 / 1024
+local scaleFactor_x = width / 1024
+local scaleFactor_y = height / 1024
 
 local raindrops = {}
 local drops = 1
+local fullscreen = true
+
+function love.keypressed(key, scancode, isrepeat)
+	if key == "escape" and fullscreen == false then -- Enter fullscreen
+		fullscreen = true
+		love.window.setFullscreen(fullscreen, "desktop")
+    elseif key == "escape" and fullscreen == true then -- Exit fullscreen
+        fullscreen = false
+        love.window.setFullscreen(fullscreen,"desktop")
+	end
+end
 
 function loadImage(path)
     local info = love.filesystem.getInfo(path)
@@ -79,7 +93,7 @@ function love.update(dt)
 end
 
 function love.draw()
-    love.graphics.draw(image, 0, 0, 0, scaleFactor, scaleFactor)
+    love.graphics.draw(image, 0, 0, 0, scaleFactor_x, scaleFactor_y)
     for _, raindrop in ipairs(raindrops) do
         love.graphics.setColor(0, raindrop.shade, 1)
         love.graphics.arc("fill", raindrop.x3, raindrop.y1, raindrop.size, 0, math.pi)
