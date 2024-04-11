@@ -11,24 +11,12 @@ function love.load()
 
 end 
 
-local width, height = love.window.getDimensions()
-
-local scaleFactor_x = width / 1024
-local scaleFactor_y = height / 1024
+local width = love.graphics.getWidth()
+local height = love.graphics.getHeight()
 
 local raindrops = {}
 local drops = 1
-local fullscreen = true
-
-function love.keypressed(key, scancode, isrepeat)
-	if key == "escape" and fullscreen == false then -- Enter fullscreen
-		fullscreen = true
-		love.window.setFullscreen(fullscreen, "desktop")
-    elseif key == "escape" and fullscreen == true then -- Exit fullscreen
-        fullscreen = false
-        love.window.setFullscreen(fullscreen,"desktop")
-	end
-end
+local isfullscreen = true
 
 function loadImage(path)
     local info = love.filesystem.getInfo(path)
@@ -39,10 +27,57 @@ end
 
 local image = loadImage("images/bgImage.jpeg")
 
-function makeRain(drops)
+local image_width = image:getWidth()
+local image_height = image:getHeight()
 
+function getScaleFactorX(wd)
+    if isfullscreen then
+        return width / image_width
+    else
+        return 800 / image_width
+    end
+end
+
+function getScaleFactorY(ht)
+    if isfullscreen then
+        return height / image_height    
+    else
+        return 800 / image_height
+    end
+end
+
+local scaleFactor_x = getScaleFactorX()
+local scaleFactor_y = getScaleFactorY()
+
+
+function love.keypressed(key, scancode, isrepeat)
+    if key == "escape" and isfullscreen == false then -- Enter fullscreen
+        isfullscreen = true
+        love.window.setMode(0, 0, {fullscreen=true, fullscreentype="desktop"})
+        
+        scaleFactor_x = getScaleFactorX()
+        scaleFactor_y = getScaleFactorY()
+
+    elseif key == "escape" and isfullscreen == true then -- Exit fullscreen
+        isfullscreen = false
+        love.window.setMode(800, 800, {fullscreen=false, fullscreentype="desktop"})
+
+        scaleFactor_x = getScaleFactorX()
+        scaleFactor_y = getScaleFactorY()
+    end
+end
+
+
+function makeRain(drops)
+    
+    if isfullscreen then
+        newWidth = width
+    else
+        newWidth = 800
+    end
+    
     local raindrop = {
-        x = math.random(0, width),
+        x = math.random(0, newWidth),
         y = 0,
         size = 6,
         speed = math.random(4, 15),
@@ -68,6 +103,13 @@ end
 drops = makeRain(drops)
 
 function love.update(dt)
+
+    if isfullscreen then
+        newWidth, newHeight = width, height
+    else
+        newWidth, newHeight = 800, 800
+    end
+
     for i, raindrop in ipairs(raindrops) do
         raindrop.y1 = raindrop.y1 + raindrop.speed
         raindrop.y2 = raindrop.y2 + raindrop.speed
@@ -75,12 +117,12 @@ function love.update(dt)
 
         raindrop.vertices = {raindrop.x1,raindrop.y1 , raindrop.x2,raindrop.y2 , raindrop.x3,raindrop.y3}
 
-        if raindrop.y1 >= height + 50 then
+        if raindrop.y1 >= newHeight + 50 then
             raindrop.y1 = raindrop.y
             raindrop.y2 = raindrop.y
             raindrop.y3 = raindrop.y - raindrop.size * 2 
 
-            raindrop.x = math.random(0, width)
+            raindrop.x = math.random(0, newWidth)
             raindrop.x1 = raindrop.x - raindrop.size
             raindrop.x2 = raindrop.x + raindrop.size
             raindrop.x3 = raindrop.x
