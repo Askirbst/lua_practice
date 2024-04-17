@@ -6,86 +6,52 @@ function love.load()
     math.randomseed(seed)
 
 end
-local size = 10
 
-local boxes = {}
+local lines = {} -- Will hold the individual lines to be drawn in love.draw()
+local line = {
 
-local function makeBox(pos_A0, pos_A1, pos_B0, pos_B1, pos_C0, pos_C1, type) 
-    return {
+    posStart = {}, -- Holds the values (x, y) for the vertices of a given line
+    posStop = {}
 
-    type = type,
+}
 
-    pos_A0 = pos_A0,
-    pos_A1 = pos_A1,
+function createMaze()
 
-    pos_B0 = pos_B0,
-    pos_B1 = pos_B1,
+    local mazeSize = 10 -- Represents the size of the maze (What size grid, i.e. 10 x 10, 5 x 5)
+    local len = 10 -- Represents the length of the lines used to create the maze
+    local offset = 10 -- Position of top left corner of maze to the edge of the screen. Effectively the zero position of the maze
 
-    pos_C0 = pos_C0,
-    pos_C1 = pos_C1
-    }
-end
+    for i = 0, mazeSize - 1, 1 do
+        for j = 0, mazeSize - 1, 1 do
 
+            if i == 0 then -- Represents the first vertice in the top left corner of maze
+                line.posStart = {offset + (i * len), offset}
+                line.posStop = {offset + len + (i * len), offset}
 
-function makeGrid()
-
-    boxType = math.random(0, 2) -- determines how many lines are drawn for a given box
-    startPos = math.random(0, 3) -- determines at what corner do the lines begin
-    
-    local x, y = 0, 0
-
-    local pos_A0 = {x, y}
-    local pos_A1 = {x, y}
-    local pos_B0 = {x, y}
-    local pos_B1 = {x, y}
-    local pos_C0 = {x, y}
-    local pos_C1 = {x, y}
-
-    local type = 0
-
-    for i = 0, 9, 1 do
-        for j = 0, 9, 1 do
-
-            if i == 0 and j == 0 then
-                local pos_A0 = {x + (i * size), y + size + (j * size)}
-                local pos_A1 = {x, y}
-
-                local pos_B0 = {x, y}
-                local pos_B1 = {x + size + (j * size), y}
-
-                type = 2
             end
-            if i ~= 0 and j == 0 then
-                pos_A0 = {x, y + (i * size)}
-                pos_A1 = {x, y + size + (i * size)}
-
-                type = 1
+            if i == 0 and j == mazeSize - 1 then -- Represents the right side of the maze
+                line.posStart = {mazeSize, len}
+                line.posStop = {mazeSize, len + (i * len)}
+            end
+            if i >= 0 and j == 0 then -- Represents the left side of the maze
+                line.posStart = {offset, offset + (i * len)}
+                line.posStop = {offset, offset + len + (i * len)}
             end
 
-            local newBox = makeBox(pos_A0, pos_A1, pos_B0, pos_B1, pos_C0, pos_C1, type)
-            table.insert(boxes, newBox)
+            table.insert(lines, line)
 
         end
     end
 end
 
-makeGrid()
+createMaze()
 
 function love.update(dt)
 
 end
 
 function love.draw()
-    for _, box in ipairs(boxes) do
-        if box.type == 1 then
-            love.graphics.line(box.pos_A0[1], box.pos_A0[2], box.pos_A1[1], box.pos_A1[2])
-
-        elseif box.type == 2 then
-            love.graphics.line(box.pos_A0[1], box.pos_A0[2], box.pos_A1[1], box.pos_A1[2], box.pos_B0[1], box.pos_B0[2], box.pos_B1[1], box.pos_B1[2])
-
-        elseif box.type == 3 then
-            love.graphics.line(box.pos_A0[1], box.pos_A0[2], box.pos_A1[1], box.pos_A1[2], box.pos_B0[1], box.pos_B0[2], box.pos_B1[1], box.pos_B1[2], box.pos_C0[1], box.pos_C0[2], box.pos_C1[1], box.pos_C1[2])
-
-        end
+    for _, line in ipairs(lines) do
+        love.graphics.line(line.posStart[1], line.posStart[2], line.posStop[1], line.posStop[2])
     end
 end
