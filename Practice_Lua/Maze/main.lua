@@ -1,10 +1,13 @@
 ---@diagnostic disable: undefined-global
 local love = require("love")
-
+local math = require("math")
 
 function love.load()
     local seed = os.time()
     math.randomseed(seed)
+    math.random()
+    math.random()
+    math.random()
 end
 
 local lines = {} -- Will hold the individual lines to be drawn in love.draw()
@@ -17,7 +20,7 @@ local function createLine(x1, y1, x2, y2)
     table.insert(lines, line)
 end
 
-function createMaze()
+local function createMaze()
 
     local mazeSize = 10 -- Represents the size of the maze (What size grid, i.e. 10 x 10, 5 x 5)
     local len = 50 -- Represents the length of the lines used to create the maze
@@ -67,7 +70,7 @@ function createMaze()
                 createLine(x1, y1, x2, y2)
             end
 
-            if i + 1 < mazeSize and j + 1 < mazeSize then -- Randomizes lines inside the border to create a maze-like picture
+            if i <= mazeSize - 1 and j <= mazeSize - 1 then -- Randomizes lines inside the border to create a maze-like picture
 
                 if math.random(0, 1) == 0 then
                     x1, y1 = offset + (len * j), offset + (i * len)
